@@ -1,11 +1,14 @@
 # counter.py
 from __future__ import annotations
-from datetime import datetime, date
-from dateutil import tz
+from datetime import datetime, date, timezone, timedelta
+try:
+    from dateutil import tz  # type: ignore
+    TZ = tz.gettz("Europe/Moscow")
+except Exception:
+    # fallback: if python-dateutil is not installed, use fixed UTC+3
+    TZ = timezone(timedelta(hours=3))
 import re
 from typing import Optional
-
-TZ = tz.gettz("Europe/Moscow")
 
 PRESETS: dict[str, str] = {
     "тимоха": "2026-11-07",
