@@ -52,7 +52,7 @@ def index():
 @app.route("/update_server", methods=["POST"])
 def webhook():
     if request.method == "POST":
-        repo = git.Repo(os.getcwd())
+        repo = git.Repo('/home/reyoj/Bloha')
         origin = repo.remotes.origin
         origin.pull()
         print("[update] repository updated")
