@@ -4,6 +4,7 @@ import random
 from typing import Optional
 
 import counter
+from ai_helper import get_ai_advice
 
 
 # Простая карта названий магазинов -> поисковая ссылка (placeholder)
@@ -26,9 +27,8 @@ KS_CONTACTS = [
 
 
 BLOHA_CHOICES = [
-    "Подбрасывай монетку: да/нет — выбирай по результату.",
-    "Блоха говорит: `Делай как чувствуешь`.",
-    "Решение: выбери среднее между двумя крайностями.",
+    "ДА",
+    "нет",
 ]
 
 
@@ -68,9 +68,13 @@ def get_reply(message_text: str) -> Optional[str]:
     if key in ("команды", "меню", "факю", "help"):
         return HELP_TEXT
 
-    # цитата / помощь
-    if key in ("помощь", "helpme"):
-        return "Как сказал старик: «Истина там, где тишина»."  # пример цитаты
+    # цитата / помощь с использованием AI
+    if key == "помощь":
+        # Извлекаем текст после команды как контекст для AI
+        context = message_text.replace(f"!{key}", "").strip()
+        if not context:
+            context = "Дай мудрый совет"
+        return get_ai_advice(context)
 
     # магазины
     if key in SHOP_LINKS:
@@ -78,7 +82,7 @@ def get_reply(message_text: str) -> Optional[str]:
 
     # кс - список командного состава
     if key == "кс":
-        return "Комсостав:\n" + "\n".join(KS_CONTACTS)
+        return "это стыдно не знать, но тем не менее:\n\nКомандир - Виноградов Кирилл Александрович, +7(921)810-51-55\nКомиссар - Атажанов Тимур Тахирович, +7(904)216-16-14\nМастер - Шаройко Владимир Сергеевич, +7(928)841-90-78"
 
     # блоха
     if key == "блоха":
