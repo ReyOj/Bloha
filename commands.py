@@ -46,6 +46,14 @@ HELP_TEXT = (
     "Карты магазинов: !5, !пятерочка, !магнит, !перек, !лента, !дикси\n"
 )
 
+QUOTES = [
+    "Как сказал старик: «Истина там, где тишина».",
+    "Великий путь начинается с малого шага.",
+    "Терпение и труд всё перетрут.",
+    "Не тот велик, кто никогда не падал, а тот велик — кто падал и вставал.",
+    "Мудрость приходит с опытом, а опыт — с ошибками.",
+]
+
 
 ALIASES = {
     # пользовательские алиасы на PRESETS
@@ -71,10 +79,11 @@ def get_reply(message_text: str) -> Optional[str]:
     # цитата / помощь с использованием AI
     if key == "помощь":
         # Извлекаем текст после команды как контекст для AI
-        context = message_text.replace(f"!{key}", "").strip()
-        if not context:
-            context = "Дай мудрый совет"
-        return get_ai_advice(context)
+        #context = message_text.replace(f"!{key}", "").strip()
+        #if not context:
+        #    context = "Дай мудрый совет"
+        #return get_ai_advice(context)
+        return random.choice(QUOTES)
 
     # магазины
     if key in SHOP_LINKS:
