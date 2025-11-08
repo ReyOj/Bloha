@@ -48,6 +48,7 @@ def vk_send(peer_id: int, text: str):
 def index():
     return "ok"
 
+#лютый вебхук для обновления кода из гита
 @app.route("/update_server", methods=["POST"])
 def webhook():
     if request.method == "POST":
