@@ -4,23 +4,28 @@ import hashlib
 import hmac
 import json
 import requests
-from counter import get_days_reply
 import random
 import time
+import git
+from commands import get_reply
 
 app = Flask(__name__)
 
-VK_CONFIRMATION = "50effcd8"
-#VK_SECRET = "sdkvjbmxskhs"
-VK_GROUP_TOKEN = "vk1.a.E9eB9bHUWo2ccgO8DgX90vCn1TPOVaQP1PhVAUyVPHa9kzpS-SW6fRB3ilE_N-mmzrNeDtrVZd0tnrE-hK3Ro4ckSlTD0dmDc1SZ-V0YfrkOEJYiH-Df-vJWBnba3fD-BF54ohH0EgrBtZKMYinTKeQndzSNTmi_6Ol4DCSPtyfaO17W7zXSp7tMuaypWSfoWwhVF2aICYiaru33al2bAA"
+VK_CONFIRMATION = os.environ.get("VK_CONFIRMATION", "50effcd8")
+#VK_SECRET = os.environ.get("VK_SECRET")
+VK_GROUP_TOKEN = os.environ.get("VK_GROUP_TOKEN", "")
 VK_API = "https://api.vk.com/method/"
-VK_VERSION = "5.199"
+VK_VERSION = os.environ.get("VK_VERSION", "5.131")
 
 def secure_compare(a: str, b: str) -> bool:
     return hmac.compare_digest(a.encode(), b.encode())
 
 def vk_send(peer_id: int, text: str):
     """Отправка сообщения: peer_id работает и для ЛС, и для бесед."""
+    if not VK_GROUP_TOKEN:
+        app.logger.error("VK_GROUP_TOKEN is not set in environment - cannot send messages")
+        raise RuntimeError("VK_GROUP_TOKEN not configured")
+
     payload = {
         "access_token": VK_GROUP_TOKEN,
         "v": VK_VERSION,
@@ -42,6 +47,17 @@ def vk_send(peer_id: int, text: str):
 @app.route("/")
 def index():
     return "ok"
+
+@app.route("/update_server", methods=["POST"])
+def webhook():
+    if request.method == "POST":
+        repo = git.Repo(os.getcwd())
+        origin = repo.remotes.origin
+        origin.pull()
+        print("[update] repository updated")
+        return "ok"
+    else:
+        return "method not allowed", 400
 
 # Быстрый тест исходящего интернета к VK API
 @app.route("/ping_vk")
@@ -98,10 +114,10 @@ def vk_callback():
 
         if isinstance(text, str) and isinstance(peer_id, int):
             try:
-                reply = get_days_reply(text)  # Optional[str]
+                reply = get_reply(text)  # Optional[str]
                 if reply is not None:
                     app.logger.warning(f"[reply] -> {reply!r}")
-                    vk_send(peer_id, "До события:\n" + reply + " дней")
+                    vk_send(peer_id, reply)
                 else:
                     app.logger.warning("[reply] no command detected -> ignore")
             except Exception as e:
