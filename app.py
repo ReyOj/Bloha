@@ -9,6 +9,8 @@ import time
 import git
 from commands import get_reply
 
+beseda = False
+
 app = Flask(__name__)
 
 VK_CONFIRMATION = os.environ.get("VK_CONFIRMATION", "50effcd8")
@@ -111,20 +113,23 @@ def vk_callback():
         peer_id = msg.get("peer_id")
         from_id = msg.get("from_id")
 
-        app.logger.warning(f"[msg] peer_id={peer_id} from_id={from_id} text={text!r}")
+        if peer_id >= 2000000000 and not beseda:
+            return "ok"
+
+        print(f"[msg] peer_id={peer_id} from_id={from_id} text={text!r}")
 
         if isinstance(text, str) and isinstance(peer_id, int):
             try:
                 reply = get_reply(text)  # Optional[str]
                 if reply is not None:
-                    app.logger.warning(f"[reply] -> {reply!r}")
+                    print(f"[reply] -> {reply!r}")
                     vk_send(peer_id, reply)
                 else:
-                    app.logger.warning("[reply] no command detected -> ignore")
+                    print("[reply] no command detected -> ignore")
             except Exception as e:
-                app.logger.error(f"[send] failed: {e}")
+                print(f"[send] failed: {e}")
         else:
-            app.logger.error("[msg] invalid payload structure")
+            print("[msg] invalid payload structure")
 
 
     # Всегда подтверждаем обработку
